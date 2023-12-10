@@ -38,14 +38,14 @@ entity registro_sipo is
 end registro_sipo;
 
 architecture solucion_registro of registro_sipo is
-    signal estado_actual, estado_sig : std_logic_vector (N-1 downto 0);
+    signal estado_actual, estado_sig : std_logic_vector (31 downto 0);
 begin
     out_datos <= estado_actual;
 
     Logicaestado_siguiente: process(all)
         begin
             if in_hab = '1' then
-                estado_sig <= in_dato & estado_actual(N-1 downto 1);
+                estado_sig <= in_dato & estado_actual(31 downto 1);
             else
                 estado_sig <= estado_actual;
             end if;
