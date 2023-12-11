@@ -1,0 +1,28 @@
+v 4
+file . "testbench.vhd" "8ebb4ebea495a302090fe8fa85eada7b015da7ec" "20231211021207.280":
+  entity receptor_ir_tb at 1( 0) + 0 on 4;
+  architecture tb of receptor_ir_tb at 9( 132) + 0 on 4;
+file . "design.vhd" "4862ba59261832b0314e6f3f5e83e96eaee3d615" "20231211021207.279":
+  package receptor_ir_pkg at 1( 0) + 0 on 4;
+  entity receptor_ir at 23( 708) + 0 on 4;
+  architecture arch of receptor_ir at 42( 1310) + 0 on 4;
+file . "contador.vhd" "e6bde2928a18bd67a21f56de546fcafc91b75f5d" "20231211021207.278":
+  package contador_pkg at 1( 0) + 0 on 4;
+  entity contador at 20( 597) + 0 on 4;
+  architecture solucion_contador of contador at 36( 1058) + 0 on 4;
+file . "control.vhd" "57be877bfe4dfde5dc80906628df886011a5f05b" "20231211021207.278":
+  package control_pkg at 1( 0) + 0 on 4;
+  entity control at 27( 893) + 0 on 4;
+  architecture solucion_control of control at 50( 1681) + 0 on 4;
+file . "det_tiempo.vhd" "c6571f92281a52f8ea36d4cb4f2a1a1c816279f4" "20231211021207.279":
+  package det_tiempo_pkg at 1( 0) + 0 on 4;
+  entity det_tiempo at 22( 704) + 0 on 4;
+  architecture solucion of det_tiempo at 38( 1168) + 0 on 4;
+file . "flip_flop_16bits.vhd" "45ee76f6b8e52d8a5960b4e18f93ac999fe2c608" "20231211021207.279":
+  package ffd_16bits_pkg at 1( 0) + 0 on 4;
+  entity ffd_16bits at 20( 710) + 0 on 4;
+  architecture solucion_ffd of ffd_16bits at 36( 1273) + 0 on 4;
+file . "sipo.vhd" "7276a4628784ea72810704b02fae1507daa11aaf" "20231211021207.280":
+  package sipo_pkg at 1( 0) + 0 on 4;
+  entity sipo at 18( 519) + 0 on 4;
+  architecture solucion_registro of sipo at 32( 932) + 0 on 4;

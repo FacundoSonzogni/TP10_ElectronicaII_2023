@@ -1,4 +1,4 @@
-.PHONY : all receptor_ir wav-receptor_ir programa
+.PHONY : all receptor_ir wav-receptor_ir 
 
 all : receptor_ir
 

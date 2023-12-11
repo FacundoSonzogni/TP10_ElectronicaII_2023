@@ -1,218 +1,59 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+use work.ffd_16bits_pkg.all;
+use work.control_pkg.all;
+use work.sipo_pkg.all;
+use work.det_tiempo_pkg.all;
 
--- FlipFlop D de 16 bits-----------------------------------------------
-entity FF_D_16b is
-    port (
-        in_cmd          : in std_logic_vector (7 downto 0);
-        in_dir          : in std_logic_vector (7 downto 0);
-        in_hab          : in std_logic;
-        in_reset          : in std_logic;
-        in_clk          : in std_logic;
-        out_cmd         : out std_logic_vector (7 downto 0);
-        out_dir         : out std_logic_vector (7 downto 0));
-end FF_D_16b;
-
-architecture solucion_FFD of FF_D_16b is
-begin
-    ffd_conRyHab : process(in_clk,in_reset)
-        begin
-            if (in_reset = '1') then
-                Q <= (others => '0');
-            elsif(rising_edge(in_clk) and in_hab='1') then
-                Q <= D;
-            end if; 
-        end process;
-end architecture;
-
-
-
---Registro de Desplazamiento------------------------------------------------
-entity registro_sipo is
-    port (
-        in_dato         : in std_logic;
-        in_clk          : in std_logic;
-        in_hab          : in std_logic;
-        in_reset        : in std_logic;
-        out_datos       : out std_logic_vector (31 downto 0));
-end registro_sipo;
-
-architecture solucion_registro of registro_sipo is
-    signal estado_actual, estado_sig : std_logic_vector (31 downto 0);
-begin
-    out_datos <= estado_actual;
-
-    Logicaestado_siguiente: process(all)
-        begin
-            if in_hab = '1' then
-                estado_sig <= in_dato & estado_actual(31 downto 1);
-            else
-                estado_sig <= estado_actual;
-            end if;
-        end process;
-
-    Memoria: process(all)
-        begin
-            if in_reset = '1' then 
-                estado_actual <= (others => '0');
-            elsif rising_edge(in_clk) then 
-                estado_actual <= estado_sig;
-            end if;
-        end process;
-end solucion_registro;
-
--- Contador --------------------------------------------------------------------
-entity contador is 
-    generic (
-        constant N:positive);
-    port (
-        rst   : in std_logic;
-        D     : in std_logic_vector (N-1 downto 0); -- que valor tiene N?
-        carga : in std_logic;
-        hab   : in std_logic;
-        clk   : in std_logic;
-        Q     : out std_logic_vector (N-1 downto 0); -- que valor tiene N?
-        Co    : out std_logic);
-end contador;
-
-architecture solucion_contador of contador is
-    signal EstadoActual, EstadoSig : std_logic_vector (N-1 downto 0);
-begin
-        LogicaSalida: process (all)
-            begin 
-                Q<=EstadoActual;
-                if EstadoActual=(N-1 downto 0 => '1') then 
-                    Co<='1';
-                else 
-                    Co <='0';
-                end if ;
-            end process;
-
-        Memoria: process(all)
-            begin
-                if rst = '1' then 
-                    EstadoActual <= (others => '0');
-                elsif rising_edge(clk) then 
-                    EstadoActual <= EstadoSig;
-                end if;
-            end process;
-
-        LogicaEstadoSig: process (all)
-        begin
-            if hab = '0' then EstadoSig <= EstadoActual;
-            elsif carga ='1' then EstadoSig <= D;
-            else EstadoSig <= std_logic_vector(unsigned (EstadoActual)+1);       
-            end if ;
-        end process;
-
-end solucion_contador;
-
--- Detector de Tiempo ---------------------------------------------------------
-entity det_tiempo is
-    generic (
-        constant N : natural := 4); -- cuanto debería ser N?
-    port (
-        rst     : in std_logic;
-        pulso   : in std_logic;
-        hab     : in std_logic;
-        clk     : in std_logic;
-        med     : out std_logic;
-        tiempo  : out std_logic_vector (N-1 downto 0));
-end det_tiempo;
-
-architecture solucion of det_tiempo is
-    component contador
-        generic (
-            constant N:positive); -- Va esto?
+-- Paquete que incluye el Receptor de Infrarrojo -------------
+package receptor_ir_pkg is
+    component receptor_ir is
         port (
-            rst   : in std_logic;
-            D     : in std_logic_vector (N-1 downto 0); -- que valor tiene N?
-            carga : in std_logic;
-            hab   : in std_logic;
-            clk   : in std_logic;
-            Q     : out std_logic_vector (N-1 downto 0); -- que valor tiene N?
-            Co    : out std_logic);
+        rst          : in std_logic;
+        infrarrojo   : in std_logic;
+        hab          : in std_logic;
+        clk          : in std_logic;
+        valido       : out std_logic;
+        dir          : out std_logic_vector (7 downto 0);
+        cmd          : out std_logic_vector (7 downto 0)); 
     end component;
+end package;
 
-    constant cte_uno:std_logic_vector(N-1 downto 0):=(0 =>'1', others=>'0');
-    signal HabContador, FlancoAsc, FlancoDes, Flanco, MedAnterior, Q_1: std_logic;
-    signal Q_2, Salida: std_logic_vector (N-1 downto 0);
+-- Declaración de la entidad ---------------------------------
+library IEEE;
+use IEEE.std_logic_1164.all;
+use work.ffd_16bits_pkg.all;
+use work.control_pkg.all;
+use work.sipo_pkg.all;
+use work.det_tiempo_pkg.all;
 
-begin                       
-    FlancoDes<= not pulso and Q_1;
-    FlancoAsc<= pulso and not Q_1;
-    
-    Flanco<= FlancoAsc or FlancoDes;
-    MedAnterior<=FlancoAsc when Flanco else med;
-    
-    Salida <= Q_2 when FlancoAsc else tiempo;
-                                                    ---- ver como es con N despues
-    U1: contador generic map (N=>N) port map ( 
-            rst=>rst,
-            D=>cte_uno,
-            carga=>FlancoDes,
-            hab=>HabContador,
-            clk=>clk,
-            Q=>Q_2
-        );
-        
-    HabContador <= hab when to_integer(unsigned(Q_2)) /= 0 else (FlancoDes and hab);
-        
-    FFD1: process(all)
-    begin
-        if rst='1' then 
-            Q_1<=('1');
-        elsif rising_edge(clk) then 
-            Q_1<=pulso;
-        end if ;
-    end process; 
-
-    FFD2: process(all)
-    begin
-        if rst='1' then 
-            med<='0';
-        elsif (rising_edge(clk)) then 
-            med<=MedAnterior;    
-        end if ;
-    end process;
-
-    FFD3: process(all)
-    begin
-        if rst='1' then 
-            tiempo<=(others=>'0');
-        elsif (rising_edge (clk)) then 
-            tiempo<=Salida;  
-        end if ;
-    end process;
-        
-end solucion;
-
-
--- RECEPTOR----------------------------------------------------------------------
 entity receptor_ir is
     port (
-        in_rst          : in std_logic;
-        in_infrarrojo   : in std_logic;
-        in_hab          : in std_logic;
-        in_clk          : in std_logic;
-        out_valido      : out std_logic;
-        out_dir         : out std_logic_vector (7 downto 0);
-        out_cmd         : out std_logic_vector (7 downto 0));
+        rst          : in std_logic;
+        infrarrojo   : in std_logic;
+        hab          : in std_logic;
+        clk          : in std_logic;
+        valido       : out std_logic;
+        dir          : out std_logic_vector (7 downto 0);
+        cmd          : out std_logic_vector (7 downto 0));
 end receptor_ir;
 
+-- Arquitectura e Implementación del Receptor de Infrarrojo ----------------
 architecture arch of receptor_ir is
-    component FF_D_16b
+
+    -- Declaración de Componentes 
+    component ffd_16bits
         port(
             in_cmd          : in std_logic_vector (7 downto 0);
             in_dir          : in std_logic_vector (7 downto 0);
             in_hab          : in std_logic;
-            in_reset          : in std_logic;
+            in_reset        : in std_logic;
             in_clk          : in std_logic;
             out_cmd         : out std_logic_vector (7 downto 0);
             out_dir         : out std_logic_vector (7 downto 0));
     end component;
 
-    component registro_sipo
+    component sipo
         port (
             in_dato         : in std_logic;
             in_clk          : in std_logic;
@@ -228,20 +69,85 @@ architecture arch of receptor_ir is
             hab     : in std_logic;
             clk     : in std_logic;
             med     : out std_logic;
-            tiempo  : out std_logic_vector (N-1 downto 0));
+            tiempo  : out std_logic_vector (5 downto 0));
     end component;
 
+    component control
+       port (
+            hab          : in std_logic;
+            med          : in std_logic;
+            rst          : in std_logic;
+            clk          : in std_logic;
+            mensaje_ok   : in std_logic;
+            tiempo       : in std_logic_vector (5 downto 0);
+            valido       : out std_logic;
+            dato         : out std_logic_vector (31 downto 0); -- Cuanto vale N?
+            hab_FF       : out std_logic;
+            hab_sipo     : out std_logic); 
+    end component;
+
+    -- Declaración de Señales
+    signal mensaje_correcto, med_det, desplazar, habilitar_ff : std_logic;
+    signal tiempo_det : std_logic_vector (5 downto 0);
+    signal dato_entrada, dato_salida : std_logic_vector (31 downto 0);
+    signal cmd_sig, cmd_negado_sig, cmd_act, dir_sig, dir_negado_sig, dir_act : std_logic_vector (7 downto 0);
+
+    -- Implementación del Receptor  
 begin
 
-    FF_D : FF_D_16b port map(
-    
-    );
-    registro : registro_sipo port map(
-    
-    );
-    detector_tiempo : det_tiempo port map(
-    --Nose si pueden tener el mismo nombre
-    );
+Detector_Tiempo_Pulsos: det_tiempo port map (
+    rst      => rst,
+    pulso    => not infrarrojo,
+    hab      => hab,
+    clk      => clk,
+    med      => med_det,
+    tiempo   => tiempo_det
+);
 
+Control: control port map (
+    hab           => hab,
+    med           => med_det,
+    rst           => rst,
+    clk           => clk,
+    mensaje_ok    => mensaje_correcto,
+    tiempo        => tiempo_det,
+    valido        => valido,
+    dato          => dato_entrada,
+    hab_FF        => habilitar_ff,
+    hab_sipo      => desplazar
+);
 
+Registro_Desplazamiento: sipo port map (
+    in_dato          => dato_entrada,
+    in_clk           => clk,
+    in_hab           => desplazar,
+    in_reset         => rst,
+    out_datos        => dato_salida
+);
+
+cmd_negado_sig <= dato_salida (31 downto 24);
+cmd_sig        <= dato_salida (23 downto 16);
+dir_negado_sig <= dato_salida (15 downto 8);
+dir_sig        <= dato_salida (7 downto 0); 
+
+mensaje_correcto <= '1' when ((cmd_negado_sig = not cmd_sig)  and  (dir_negado_sig = not dir_sig)) else
+                    '0';
+
+Flip_Flop_16bits: ffd_16bits port map (
+    in_cmd       => cmd_sig,
+    in_dir       => dir_sig,
+    in_hab       => habilitar_ff,
+    in_reset     => rst,
+    in_clk       => clk,
+    out_cmd      => cmd_act,  
+    out_dir      => dir_act   
+);
+
+cmd <= cmd_act;
+dir <= dir_act;
+    
 end architecture;
+
+
+
+
