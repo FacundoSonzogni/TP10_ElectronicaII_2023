@@ -38,7 +38,7 @@ begin
     end if;
 end process;
 
-Detector_Tiempo_Pulsos: det_tiempo generic map (N=>6) port map (
+Detector_Tiempo_Pulsos: det_tiempo generic map (N => 5) port map (
     rst      => rst,
     pulso    => not infrarrojo,
     hab      => hab,
@@ -60,7 +60,7 @@ control_1: control port map (
     hab_sipo      => desplazar
 );
 
-Registro_Desplazamiento: sipo port map (
+Registro_Desplazamiento: sipo generic map (N => 32) port map (
     in_dato          => dato_entrada,
     in_clk           => clk,
     in_hab           => desplazar,
