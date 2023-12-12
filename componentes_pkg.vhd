@@ -9,7 +9,7 @@ package componentes_pkg is
             rst          : in std_logic;
             clk          : in std_logic;
             mensaje_ok   : in std_logic;
-            tiempo       : in std_logic_vector (5 downto 0);
+            tiempo       : in std_logic_vector (4 downto 0);
             valido       : out std_logic;
             dato         : out std_logic;
             hab_FF       : out std_logic;
@@ -240,7 +240,7 @@ entity control is
         rst          : in std_logic;
         clk          : in std_logic;
         mensaje_ok   : in std_logic;
-        tiempo       : in std_logic_vector (5 downto 0);
+        tiempo       : in std_logic_vector (4 downto 0);
         valido       : out std_logic;
         dato         : out std_logic;
         hab_FF       : out std_logic;
@@ -248,7 +248,7 @@ entity control is
 end control;
 
 architecture solucion_control of control is
-    signal cont_sig, cont_act : std_logic_vector (5 downto 0);
+    signal cont_sig, cont_act : std_logic_vector (4 downto 0);
     signal valido_sig, valido_act : std_logic;
     signal tiempo_entero, cont_act_entero : integer;
     type Tipo_Estado is (espera, recepcion, verificacion);

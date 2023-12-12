@@ -19,7 +19,7 @@ architecture arch of receptor_ir is
 
     -- Declaración de Señales
     signal mensaje_correcto, med_det, desplazar, habilitar_ff : std_logic;
-    signal tiempo_det   : std_logic_vector (5 downto 0);
+    signal tiempo_det   : std_logic_vector (4 downto 0);
     signal dato_entrada : std_logic;
     signal dato_salida  : std_logic_vector (31 downto 0);
     signal cmd_sig, cmd_negado_sig, cmd_act, dir_sig, dir_negado_sig, dir_act : std_logic_vector (7 downto 0);
