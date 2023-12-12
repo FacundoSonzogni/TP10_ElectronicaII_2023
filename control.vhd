@@ -48,6 +48,39 @@ end control;
 
 -- Arquitectura e Implementación del Controlador ----------------
 architecture solucion_control of control is
+    signal dato_act, dato_sig : std_logic_vector (31 downto 0);
+    signal cont_sig, cont_act : std_logic_vector (5 downto 0);
 begin
+
+    MEMORIA_ESTADO : process (clk, rst)
+    begin
+        if rst = '1' then     -- Si rst = '1', debe mantenerse en estado de "Espera"
+            hab_FF <= '0';
+            hab_sipo <= '0';
+            valido <= '0';
+            dato_act <= (others => '0');
+            cont_act <= (others => '0');
+        elsif rising_edge(clk) then
+            if hab = '1' then   -- Cuando hab = '1', funciona normalmente, caso contrario, todo mantiene su valor
+                dato_act <= dato_sig;
+                cont_act <= cont_sig;
+            end if;
+        end if;
+    end process;
+
+    LOGICA_ESTADO_SIGUIENTE : process (all)
+    begin
+        if  med = '0' then    -- Si med = '0' se encuentra en "Espera" y debe mantenerse hasta que med sea 1 
+            hab_FF <= '0';
+            hab_sipo <= '0';
+            valido <= '0';
+            dato_act <= (others => '0');
+            cont_act <= (others => '0');
+        elsif med = '1' then   -- Si med = '1' terminó la medición. Debe pasar al estado de "Recepción"
+
+            ------------------------------TERMINAR-------------------------------------------------------
+
+        end if;
+    end process;
    
 end architecture;
