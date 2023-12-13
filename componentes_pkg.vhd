@@ -250,18 +250,20 @@ end control;
 architecture solucion_control of control is
     signal cont_sig, cont_act : std_logic_vector (4 downto 0);
     signal valido_sig, valido_act : std_logic;
-    signal tiempo_entero, cont_act_entero : integer;
+    signal tiempo_unsigned, cont_act_unsigned : unsigned (4 downto 0);
     type Tipo_Estado is (espera, recepcion, verificacion);
     signal estado_act, estado_sig : Tipo_Estado;
 begin
 
-    tiempo_entero <= to_integer(unsigned(tiempo));
-    cont_act_entero <= to_integer(unsigned(cont_act));
+    tiempo_unsigned <= to_unsigned(tiempo);
+    cont_act_unsigned <= to_unsigned(cont_act);
     
     MEMORIA_ESTADO :  process (clk, rst)
     begin
         if rst = '1' then
             estado_act <= espera;
+            valido_act <= '0';
+            cont_act <= (others => '0');
         elsif rising_edge(clk) then
             if hab = '1' then
                 estado_act <= estado_sig;
@@ -273,61 +275,99 @@ begin
 
     LOGICA_ESTADO_SIGUIENTE  : process (all)
     begin
-        
-        if estado_act = espera then
-            if med = '0' then
-                estado_sig <= espera;
-            elsif med = '1' then
-                if ((11 <= tiempo_entero) and (tiempo_entero <= 13)) then
+
+        case estado_act is
+            when espera =>
+                if med = '0' then
                     estado_sig <= espera;
+                elsif med = '1' then
+                    if ((11 <= tiempo_unsigned) and (tiempo_unsigned <= 13)) then
+                        estado_sig <= espera;
+                    elsif ((23 <= tiempo_unsigned) and (tiempo_unsigned <= 25)) then
+                        estado_sig <= recepcion;
+                    end if;
+                end if;
+
+            when recepcion =>
+                if med = '0' then
+                    estado_sig <= recepcion;
+                elsif med = '1' then
+                    if ((2 <= tiempo_unsigned) and (tiempo_unsigned <= 4)) and (cont_act_unsigned <= 30)  then
+                        estado_sig <= recepcion; 
+                    elsif ((8 <= tiempo_unsigned) and (tiempo_unsigned <= 10)) and (cont_act_unsigned <= 30)  then
+                        estado_sig <= recepcion;
+                    elsif ((2 <= tiempo_unsigned) and (tiempo_unsigned <= 4)) and (cont_act_unsigned = 31)  then
+                        estado_sig <= verificacion;
+                    elsif ((8 <= tiempo_unsigned) and (tiempo_unsigned <= 10)) and (cont_act_unsigned = 31)  then
+                        estado_sig <= verificacion;
+                    end if;
+                end if;
+
+            when verificacion =>
+                if mensaje_ok = '1' then
+                    estado_sig <= espera;
+                elsif mensaje_ok = '0' then
+                    estado_sig <= espera;   
+                end if;
+
+            when others =>
+                    estado_sig <= espera;
+        end case;
+
+    LOGICA_SALIDA : process (all)
+    begin
+
+        -- Valores por Defecto
+        hab_FF <= '0';
+        hab_sipo <= '0';
+        valido_sig <= '0';
+        cont_sig <= cont_act;
+
+        case estado_act is
+            when espera =>
+                if med = '1' then
+                    if ((11 <= tiempo_unsigned) and (tiempo_unsigned <= 13)) and valido_act = '1' then
+                        hab_FF <= '0';
+                        valido_sig <= '1';
+                    elsif ((23 <= tiempo_unsigned) and (tiempo_unsigned <= 25)) then
+                        cont_sig <= (others => '0');
+                    end if;
+                end if;
+
+            when recepcion =>
+                if med = '1' then
+                    if ((2 <= tiempo_unsigned) and (tiempo_unsigned <= 4)) and (cont_act_unsigned <= 30)  then
+                        dato <= '0';
+                        cont_sig <= std_logic_vector(unsigned(cont_act) + 1);
+                        hab_sipo <= '1';
+                    elsif ((8 <= tiempo_unsigned) and (tiempo_unsigned <= 10)) and (cont_act_unsigned <= 30)  then
+                        dato <= '1';
+                        cont_sig <= std_logic_vector(unsigned(cont_act) + 1);
+                        hab_sipo <= '1';
+                    elsif ((2 <= tiempo_unsigned) and (tiempo_unsigned <= 4)) and (cont_act_unsigned = 31)  then
+                        dato <= '0';
+                        cont_sig <= (others => '0');
+                        hab_sipo <= '1';
+                    elsif ((8 <= tiempo_unsigned) and (tiempo_unsigned <= 10)) and (cont_act_unsigned = 31)  then
+                        dato <= '1';
+                        cont_sig <= (others => '0');
+                        hab_sipo <= '1';
+                    end if;
+                end if;
+
+            when verificacion =>
+                if mensaje_ok = '1' then
+                    hab_sipo <= '0';
+                    hab_FF <= '1';
+                    valido_sig <= '1';
+                elsif mensaje_ok = '0' then
+                    hab_sipo <= '0';
                     hab_FF <= '0';
-                elsif ((23 <= tiempo_entero) and (tiempo_entero <= 25)) then
-                    cont_sig <= (others => '0');
-                    estado_sig <= recepcion;
-                end if;
-            end if;
-        end if;
-
-        if estado_act = recepcion then
-            if med = '0' then
-                estado_sig <= recepcion;
-            elsif med = '1' then
-                if ((2 <= tiempo_entero) and (tiempo_entero <= 4)) and (cont_act_entero <= 30)  then
-                    dato <= '0';
-                    cont_sig <= std_logic_vector(unsigned(cont_act) + 1);
-                    estado_sig <= recepcion; 
-                elsif ((8 <= tiempo_entero) and (tiempo_entero <= 10)) and (cont_act_entero <= 30)  then
-                    dato <= '1';
-                    cont_sig <= std_logic_vector(unsigned(cont_act) + 1);
-                    estado_sig <= recepcion;
-                elsif ((2 <= tiempo_entero) and (tiempo_entero <= 4)) and (cont_act_entero = 31)  then
-                    dato <= '0';
-                    cont_sig <= (others => '0');
-                    estado_sig <= verificacion;
-                elsif ((8 <= tiempo_entero) and (tiempo_entero <= 10)) and (cont_act_entero = 31)  then
-                    dato <= '1';
-                    cont_sig <= (others => '0');
-                    estado_sig <= verificacion;
-                end if;
-            end if;
-        end if;
-
-        if estado_act = verificacion then
-            if mensaje_ok = '1' then
-                hab_sipo <= '1';
-                hab_FF <= '1';
-                valido_sig <= '1';
-                estado_sig <= espera;
-            elsif mensaje_ok = '0' then
-                hab_sipo <= '0';
-                hab_FF <= '0';
-                valido_sig <= '0';
-                estado_sig <= espera;   
-            end if;
-        end if;
+                    valido_sig <= '0';  
+                end if;                
+                 
+        end case;        
     end process;
-
-    -- LOGICA_SALIDA
 
     valido <= valido_act;
 
