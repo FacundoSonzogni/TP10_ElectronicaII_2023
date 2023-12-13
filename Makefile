@@ -14,4 +14,4 @@ wav-receptor_ir :
 	gtkwave -f receptor_ir_tb.ghw
 
 clean :
-	rm design.o e~receptor_ir_tb.o testbench.o receptor_ir_tb.exe work-obj08.cf receptor_ir_tb.ghw
+	rm *.cf *.o *.exe *.ghw

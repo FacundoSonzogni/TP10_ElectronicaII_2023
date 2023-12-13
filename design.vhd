@@ -32,7 +32,7 @@ begin
     if rst = '1' then
         cmd_act <= (others => '0');
         dir_act <= (others => '0');
-    elsif rising_edge(clk) and hab = '1' then
+    elsif rising_edge(clk) and habilitar_ff = '1' then
         cmd_act <= cmd_sig;
         dir_act <= dir_sig;
     end if;

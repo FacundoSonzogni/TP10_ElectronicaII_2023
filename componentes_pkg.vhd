@@ -183,7 +183,7 @@ begin
     FlancoAsc <= pulso and not Q_1;
     
     Flanco <= FlancoAsc or FlancoDes;
-    MedAnterior <=FlancoAsc when Flanco else med;
+    MedAnterior <= FlancoAsc when Flanco else med;
     
     Salida <= Q_2 when FlancoAsc else tiempo;
 
@@ -196,7 +196,7 @@ begin
             Q       => Q_2
         );
         
-    HabContador <= hab when to_integer(unsigned(Q_2)) /= 0 else (FlancoDes and hab);
+    HabContador <= hab when unsigned(Q_2) /= 0 else (FlancoDes and hab);
         
     FFD1: process(all)
     begin
@@ -212,7 +212,11 @@ begin
         if rst = '1' then 
             med <= '0';
         elsif (rising_edge(clk)) then 
-            med <= MedAnterior;    
+            if (med = '0') then
+                med <= MedAnterior;
+            elsif (med = '1') then
+                med <= '0';
+            end if;
         end if ;
     end process;
 
@@ -255,8 +259,8 @@ architecture solucion_control of control is
     signal estado_act, estado_sig : Tipo_Estado;
 begin
 
-    tiempo_unsigned <= to_unsigned(tiempo);
-    cont_act_unsigned <= to_unsigned(cont_act);
+    tiempo_unsigned <= unsigned(tiempo);
+    cont_act_unsigned <= unsigned(cont_act);
     
     MEMORIA_ESTADO :  process (clk, rst)
     begin
@@ -313,6 +317,7 @@ begin
             when others =>
                     estado_sig <= espera;
         end case;
+    end process;
 
     LOGICA_SALIDA : process (all)
     begin

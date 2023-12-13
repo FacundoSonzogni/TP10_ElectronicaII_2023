@@ -59,7 +59,7 @@ begin
         constant TIEMPO_OSC_CERO  : time := 1 * TIEMPO_LUZ_BIT;
         constant TIEMPO_OSC_UNO   : time := 3 * TIEMPO_LUZ_BIT;
         constant TIEMPO_LUZ_STOP  : time := TIEMPO_LUZ_BIT;
-        constant DIR : std_logic_vector (7 downto 0) := x"00";
+        constant DIR : std_logic_vector (7 downto 0) := x"EF";
         constant CMD : std_logic_vector (7 downto 0) := x"AD";
     begin
         in_rst        <= '1';
