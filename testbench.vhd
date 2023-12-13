@@ -55,6 +55,7 @@ begin
         
         constant TIEMPO_LUZ_START : time := 9 ms;
         constant TIEMPO_OSC_START : time := 4.5 ms;
+        constant TIEMPO_OSC_REP   : time := TIEMPO_OSC_START/2;
         constant TIEMPO_LUZ_BIT   : time := 562.5 us;
         constant TIEMPO_OSC_CERO  : time := 1 * TIEMPO_LUZ_BIT;
         constant TIEMPO_OSC_UNO   : time := 3 * TIEMPO_LUZ_BIT;
@@ -102,6 +103,15 @@ begin
                 end if;
             end loop;    
         end loop;
+        in_infrarrojo <= CON_LUZ;
+        wait for TIEMPO_LUZ_STOP;
+        in_infrarrojo <= SIN_LUZ;
+        wait for 1 ms;
+        -- Repeticion
+        in_infrarrojo <= CON_LUZ;
+        wait for TIEMPO_LUZ_START;
+        in_infrarrojo <= SIN_LUZ;
+        wait for TIEMPO_OSC_REP;
         in_infrarrojo <= CON_LUZ;
         wait for TIEMPO_LUZ_STOP;
         in_infrarrojo <= SIN_LUZ;
