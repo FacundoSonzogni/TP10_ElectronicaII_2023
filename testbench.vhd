@@ -60,8 +60,10 @@ begin
         constant TIEMPO_OSC_CERO  : time := 1 * TIEMPO_LUZ_BIT;
         constant TIEMPO_OSC_UNO   : time := 3 * TIEMPO_LUZ_BIT;
         constant TIEMPO_LUZ_STOP  : time := TIEMPO_LUZ_BIT;
-        constant DIR : std_logic_vector (7 downto 0) := x"EF";
-        constant CMD : std_logic_vector (7 downto 0) := x"AD";
+        constant DIR_1 : std_logic_vector (7 downto 0) := x"EF";
+        constant CMD_1 : std_logic_vector (7 downto 0) := x"AD";
+        constant DIR_2 : std_logic_vector (7 downto 0) := x"AA";
+        constant CMD_2 : std_logic_vector (7 downto 0) := x"BB";
     begin
         in_rst        <= '1';
         in_hab        <= '1';
@@ -78,12 +80,12 @@ begin
         in_infrarrojo <= SIN_LUZ;
         wait for TIEMPO_OSC_START;
         for invertir in 0 to 1 loop
-            for i in DIR'REVERSE_RANGE loop
+            for i in DIR_1'REVERSE_RANGE loop
                 in_infrarrojo <= CON_LUZ;
                 wait for TIEMPO_LUZ_BIT;
                 in_infrarrojo <= SIN_LUZ;
-                if    (invertir = 0 and DIR(i) = '1') 
-                   or (invertir = 1 and DIR(i) = '0') then
+                if    (invertir = 0 and DIR_1(i) = '1') 
+                   or (invertir = 1 and DIR_1(i) = '0') then
                     wait for TIEMPO_OSC_UNO;
                 else
                     wait for TIEMPO_OSC_CERO;
@@ -91,12 +93,65 @@ begin
             end loop;
         end loop;
         for invertir in 0 to 1 loop
-            for i in CMD'REVERSE_RANGE loop
+            for i in CMD_1'REVERSE_RANGE loop
                 in_infrarrojo <= CON_LUZ;
                 wait for TIEMPO_LUZ_BIT;
                 in_infrarrojo <= SIN_LUZ;
-                if    (invertir = 0 and CMD(i) = '1') 
-                   or (invertir = 1 and CMD(i) = '0') then
+                if    (invertir = 0 and CMD_1(i) = '1') 
+                   or (invertir = 1 and CMD_1(i) = '0') then
+                    wait for TIEMPO_OSC_UNO;
+                else
+                    wait for TIEMPO_OSC_CERO;
+                end if;
+            end loop;    
+        end loop;
+        in_infrarrojo <= CON_LUZ;
+        wait for TIEMPO_LUZ_STOP;
+        in_infrarrojo <= SIN_LUZ;
+        
+        -- Repeticion------------------------
+        wait for 10 ms;
+        in_hab        <= '0';
+        wait for 10 ms;
+        in_hab        <= '1';
+        in_infrarrojo <= CON_LUZ;
+        wait for TIEMPO_LUZ_START;
+        in_infrarrojo <= SIN_LUZ;
+        wait for TIEMPO_OSC_REP;
+        in_infrarrojo <= CON_LUZ;
+        wait for TIEMPO_LUZ_STOP;
+        in_infrarrojo <= SIN_LUZ;
+        wait for 1 ms;
+
+        -- Envia otro codigo------------------
+        wait for 10 ms;
+        in_hab        <= '0';
+        wait for 10 ms;
+        in_hab        <= '1';
+        in_infrarrojo <= CON_LUZ;
+        wait for TIEMPO_LUZ_START;
+        in_infrarrojo <= SIN_LUZ;
+        wait for TIEMPO_OSC_START;
+        for invertir in 0 to 1 loop
+            for i in DIR_2'REVERSE_RANGE loop
+                in_infrarrojo <= CON_LUZ;
+                wait for TIEMPO_LUZ_BIT;
+                in_infrarrojo <= SIN_LUZ;
+                if    (invertir = 0 and DIR_2(i) = '1') 
+                   or (invertir = 1 and DIR_2(i) = '0') then
+                    wait for TIEMPO_OSC_UNO;
+                else
+                    wait for TIEMPO_OSC_CERO;
+                end if;
+            end loop;
+        end loop;
+        for invertir in 0 to 1 loop
+            for i in CMD_2'REVERSE_RANGE loop
+                in_infrarrojo <= CON_LUZ;
+                wait for TIEMPO_LUZ_BIT;
+                in_infrarrojo <= SIN_LUZ;
+                if    (invertir = 0 and CMD_2(i) = '1') 
+                   or (invertir = 1 and CMD_2(i) = '0') then
                     wait for TIEMPO_OSC_UNO;
                 else
                     wait for TIEMPO_OSC_CERO;
@@ -107,16 +162,64 @@ begin
         wait for TIEMPO_LUZ_STOP;
         in_infrarrojo <= SIN_LUZ;
         wait for 1 ms;
-        -- Repeticion
+
+        --Envia codigo invalido----------
+        wait for 10 ms;
+        in_hab        <= '0';
+        wait for 10 ms;
+        in_hab        <= '1';
         in_infrarrojo <= CON_LUZ;
         wait for TIEMPO_LUZ_START;
         in_infrarrojo <= SIN_LUZ;
-        wait for TIEMPO_OSC_REP;
+        wait for TIEMPO_OSC_START;
+        --Envia Dir_1
+        for i in DIR_1'REVERSE_RANGE loop
+            in_infrarrojo <= CON_LUZ;
+            wait for TIEMPO_LUZ_BIT;
+            in_infrarrojo <= SIN_LUZ;
+            if  DIR_1(i) = '1' then 
+                wait for TIEMPO_OSC_UNO;
+            else
+                wait for TIEMPO_OSC_CERO;
+            end if;
+        end loop;
+        --Envia Dir_2
+        for i in DIR_2'REVERSE_RANGE loop
+            in_infrarrojo <= CON_LUZ;
+            wait for TIEMPO_LUZ_BIT;
+            in_infrarrojo <= SIN_LUZ;
+            if  DIR_2(i) = '1' then
+                wait for TIEMPO_OSC_UNO;
+            else
+                wait for TIEMPO_OSC_CERO;
+            end if;
+        end loop;
+        
+        for invertir in 0 to 1 loop
+            for i in CMD_1'REVERSE_RANGE loop
+                in_infrarrojo <= CON_LUZ;
+                wait for TIEMPO_LUZ_BIT;
+                in_infrarrojo <= SIN_LUZ;
+                if    (invertir = 0 and CMD_1(i) = '1') 
+                   or (invertir = 1 and CMD_1(i) = '0') then
+                    wait for TIEMPO_OSC_UNO;
+                else
+                    wait for TIEMPO_OSC_CERO;
+                end if;
+            end loop;    
+        end loop;
         in_infrarrojo <= CON_LUZ;
         wait for TIEMPO_LUZ_STOP;
         in_infrarrojo <= SIN_LUZ;
+        wait for 20 ms;
+        in_hab        <= '0';
         wait for 1 ms;
+
         finish;
     end process;
 
+
+
+
+    
 end architecture;

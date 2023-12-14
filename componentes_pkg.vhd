@@ -331,7 +331,7 @@ begin
         case estado_act is
             when espera =>
                 if med = '1' then
-                    if ((11 <= tiempo_unsigned) and (tiempo_unsigned <= 13)) and valido_act = '1' then
+                    if ((11 <= tiempo_unsigned) and (tiempo_unsigned <= 13)) and mensaje_ok = '1' then
                         hab_FF <= '0';
                         valido_sig <= '1';
                     elsif ((23 <= tiempo_unsigned) and (tiempo_unsigned <= 25)) then
@@ -368,7 +368,7 @@ begin
                 elsif mensaje_ok = '0' then
                     hab_sipo <= '0';
                     hab_FF <= '0';
-                    valido_sig <= '0';  
+                    valido_sig <= '0';
                 end if;                
                  
         end case;        
