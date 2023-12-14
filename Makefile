@@ -2,6 +2,7 @@
 
 all : receptor_ir
 
+
 receptor_ir : design.vhd testbench.vhd
 	ghdl -i --std=08 *.vhd
 	ghdl -m --std=08 receptor_ir_tb

@@ -14,7 +14,7 @@ entity receptor_ir is
         cmd          : out std_logic_vector (7 downto 0));
 end receptor_ir;
 
--- Arquitectura e Implementación del Receptor de Infrarrojo ----------------
+-- Arquitectura e Implementación del Receptor de Infrarrojo ---------------
 architecture arch of receptor_ir is
 
     -- Declaración de Señales

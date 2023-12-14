@@ -1,4 +1,4 @@
-*.o
-*.cf
-*.exe
-*.ghw
+ *.o
+ *.cf
+ *.exe
+ *.ghw

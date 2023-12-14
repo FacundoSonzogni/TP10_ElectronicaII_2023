@@ -163,7 +163,7 @@ begin
         in_infrarrojo <= SIN_LUZ;
         wait for 1 ms;
 
-        --Envia codigo invalido----------
+        --Envia codigo invalido---------
         wait for 10 ms;
         in_hab        <= '0';
         wait for 10 ms;
